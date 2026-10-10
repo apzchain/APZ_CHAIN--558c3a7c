@@ -1,0 +1,15 @@
+```
+apz-chain/
+├── contracts/
+│   ├── APZToken.sol
+│   └── Staking.sol
+├── scripts/
+│   ├── deploy.js
+│   └── stake.js
+├── test/
+│   └── staking.test.js
+├── .env.example
+├── hardhat.config.js
+├── package.json
+└── README.md
+```
