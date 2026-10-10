@@ -1,0 +1,34 @@
+پیش‌نیاز
+
+· Node.js نسخه ۱۸ یا بالاتر
+· npm یا yarn
+
+مراحل نصب و اجرا
+
+```bash
+# 1. ساخت پوشه پروژه
+mkdir apz-chain && cd apz-chain
+
+# 2. کپی کردن تمام فایل‌های بالا در مسیرهای مشخص‌شده
+
+# 3. نصب وابستگی‌ها
+npm install
+
+# 4. کامپایل قراردادها
+npx hardhat compile
+
+# 5. اجرای تست‌ها
+npx hardhat test
+
+# 6. اجرای شبکه محلی Hardhat (در یک ترمینال جداگانه)
+npx hardhat node
+
+# 7. استقرار قراردادها روی شبکه محلی (در ترمینال دیگر)
+npx hardhat run scripts/deploy.js --network localhost
+
+# 8. (اختیاری) تعامل با قرارداد
+# ابتدا آدرس‌های چاپ‌شده را در فایل .env قرار دهید
+cp .env.example .env
+# سپس مقادیر TOKEN_ADDRESS و STAKING_ADDRESS را وارد کنید
+npx hardhat run scripts/stake.js --network localhost
+```
