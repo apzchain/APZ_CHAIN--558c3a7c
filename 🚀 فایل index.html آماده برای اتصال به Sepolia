@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0e1a" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="description" content="APZ-Chain - شبکه‌ی غیرمتمرکز یادگیری و محتوای آموزشی روی Sepolia" />
+<title>APZ-Chain | Sepolia Testnet</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.12.0/dist/ethers.umd.min.js"></script>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Vazirmatn, sans-serif;
+  }
+
+  :root {
+    --bg: #0b0e1a;
+    --bg-2: #131829;
+    --card: rgba(255, 255, 255, 0.05);
+    --border: rgba(255, 255, 255, 0.08);
+    --primary: #7c3aed;
+    --primary-2: #4f46e5;
+    --accent: #a78bfa;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --text: #e0e4f0;
+    --muted: #94a3b8;
+    --bottom-nav: 74px;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding-bottom: calc(var(--bottom-nav) + env(safe-area-inset-bottom, 12px));
+    background:
+      radial-gradient(circle at 20% 0%, rgba(124, 58, 237, 0.15), transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(37, 99, 235, 0.12), transparent 50%),
+      var(--bg);
+  }
+
+  .status-bar {
+    height: env(safe-area-inset-top, 0px);
+    background: transparent;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11, 14, 26, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; }
+
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  }
+
+  .brand-name { font-size: 1.05rem; font-weight: 800; line-height: 1.1; }
+  .brand-sub { font-size: 0.65rem; color: var(--muted); font-weight: 500; }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .wallet-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .wallet-btn:active { transform: scale(0.95); }
+
+  .wallet-btn.connected {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #4ade80;
+  }
+
+  .network-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+
+  .network-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: #fbbf24;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  main {
+    padding: 16px;
+    max-width: 720px;
+    margin: 0 auto;
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title i { color: var(--accent); }
+
+  .badge {
+    background: rgba(124, 58, 237, 0.2);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .badge.success { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+  .badge.danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+  .badge.warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+  .balance-card {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(37, 99, 235, 0.15));
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 24px;
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .balance-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.4), transparent 70%);
+    border-radius: 50%;
+  }
+
+  .balance-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .balance-amount {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.1;
+  }
+
+  .balance-unit {
+    font-size: 1rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 6px;
+  }
+
+  .balance-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
+    gap: 10px;
+  }
+
+  .balance-item { flex: 1; }
+  .balance-item-label { font-size: 0.68rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 4px; }
+  .balance-item-value { font-size: 0.95rem; font-weight: 700; }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .action-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .action-btn:active {
+    transform: scale(0.94);
+    background: rgba(124, 58, 237, 0.15);
+    border-color: rgba(124, 58, 237, 0.4);
+  }
+
+  .action-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(37, 99, 235, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  .action-label { font-size: 0.68rem; font-weight: 600; color: var(--muted); }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .input-field {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  }
+
+  .input-field::placeholder { color: #475569; }
+
+  .input-with-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-with-btn .input-field { padding-left: 70px; }
+
+  .max-btn {
+    position: absolute;
+    left: 8px;
+    background: rgba(124, 58, 237, 0.2);
+    border: none;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 7px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .proposal {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-right: 3px solid var(--accent);
+  }
+
+  .proposal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .proposal-id { font-weight: 800; font-size: 0.85rem; color: var(--accent); }
+  .proposal-desc { font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px; color: var(--text); }
+
+  .proposal-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .proposal-stats strong { color: var(--text); }
+
+  .proposal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .vote-btn {
+    padding: 9px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .vote-btn.for {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+  }
+
+  .vote-btn.against {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+  }
+
+  .doc-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .doc-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(37, 99, 235, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .doc-info { flex: 1; }
+  .doc-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 3px; }
+  .doc-sub { font-size: 0.7rem; color: var(--muted); }
+  .doc-arrow { color: var(--muted); font-size: 0.8rem; }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--bottom-nav) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(11, 14, 26, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 200;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 4px;
+    cursor: pointer;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .nav-item i { font-size: 1.15rem; }
+  .nav-item span { font-size: 0.65rem; font-weight: 600; }
+  .nav-item.active { color: var(--accent); }
+
+  .toast {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: rgba(30, 41, 59, 0.98);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(34, 197, 94, 0.4); }
+  .toast.error { border-color: rgba(239, 68, 68, 0.4); }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .empty-state i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--accent);
+    opacity: 0.5;
+  }
+
+  .info-banner {
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 0.78rem;
+    color: #93c5fd;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .info-banner.warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.25);
+    color: #fbbf24;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--bg-2);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 720px;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    border: 1px solid var(--border);
+    border-bottom: none;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    margin: 0 auto 16px;
+  }
+
+  .modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.success { color: #4ade80; }
+
+  .tx-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="status-bar"></div>
+
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-logo">AP</div>
+    <div>
+      <div class="brand-name">APZ<span class="gradient-text">Chain</span></div>
+      <div class="brand-sub">Asanpardaz Zagros</div>
+      <div class="network-badge">
+        <span class="dot"></span>
+        Sepolia Testnet
+      </div>
+    </div>
+  </div>
+  <button class="wallet-btn" id="connectBtn">
+    <i class="fas fa-wallet"></i>
+    <span id="walletText">اتصال</span>
+  </button>
+</header>
+
+<main>
+
+  <section class="page active" id="page-dashboard">
+    <div class="balance-card">
+      <div class="balance-label">موجودی توکن APZ</div>
+      <div class="balance-amount">
+        <span id="tokenBalance">0.00</span>
+        <span class="balance-unit">APZ</span>
+      </div>
+      <div class="balance-row">
+        <div class="balance-item">
+          <div class="balance-item-label">🔒 استیک شده</div>
+          <div class="balance-item-value" id="stakedBalance">0.00</div>
+        </div>
+        <div class="balance-item">
+          <div class="balance-item-label">🎁 پاداش</div>
+          <div class="balance-item-value" id="rewardBalance" style="color: var(--accent);">0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-grid">
+      <a class="action-btn" onclick="showPage('staking')">
+        <div class="action-icon"><i class="fas fa-coins"></i></div>
+        <div class="action-label">استیکینگ</div>
+      </a>
+      <a class="action-btn" onclick="showPage('governance')">
+        <div class="action-icon"><i class="fas fa-gavel"></i></div>
+        <div class="action-label">حاکمیت</div>
+      </a>
+      <a class="action-btn" onclick="showPage('education')">
+        <div class="action-icon"><i class="fas fa-book"></i></div>
+        <div class="action-label">آموزش</div>
+      </a>
+      <a class="action-btn" onclick="openSupport()">
+        <div class="action-icon"><i class="fas fa-headset"></i></div>
+        <div class="action-label">پشتیبانی</div>
+      </a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-chart-line"></i> کل عرضه</div>
+        <div class="stat-value" id="totalSupply">1,000,000</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-users"></i> کاربران</div>
+        <div class="stat-value accent" id="usersCount">1,234</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-cube"></i> بلاک</div>
+        <div class="stat-value" id="blockNumber">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-network-wired"></i> شبکه</div>
+        <div class="stat-value success" style="font-size: 0.9rem;">Sepolia</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-bolt"></i> اقدامات سریع</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="showPage('staking')">
+          <i class="fas fa-arrow-up"></i> استیک
+        </button>
+        <button class="btn btn-secondary" onclick="showPage('staking')">
+          <i class="fas fa-arrow-down"></i> برداشت
+        </button>
+      </div>
+    </div>
+
+    <div class="info-banner warning">
+      <i class="fas fa-flask"></i>
+      <div>
+        <strong>شبکه تست Sepolia:</strong> این محیط برای آزمایش است. توکن APZ اینجا <strong>ارزش واقعی ندارد</strong>.
+        برای دریافت ETH تستی رایگان به <a href="https://sepoliafaucet.com" target="_blank" style="color: var(--accent);">sepoliafaucet.com</a> مراجعه کنید.
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <i class="fas fa-info-circle"></i>
+      <div>
+        <strong>اتصال:</strong> دکمه «اتصال» را بزنید. اگر MetaMask نصب باشد مستقیماً وصل می‌شود. در غیر این صورت WalletConnect باز می‌شود.
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-staking">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-coins"></i> استیکینگ</div>
+        <span class="badge">پاداش فعال</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">مقدار APZ</label>
+        <div class="input-with-btn">
+          <input type="numbe
