@@ -1,0 +1,8 @@
+# کلید خصوصی یک کیف پول تستی (هرگز از کیف پول اصلی استفاده نکنید!)
+SEPOLIA_PRIVATE_KEY=0xYOUR_SEPOLIA_TEST_WALLET_PRIVATE_KEY
+
+# آدرس RPC (اگر می‌خواهید از RPC اختصاصی استفاده کنید، جایگزین کنید)
+SEPOLIA_RPC_URL=https://eth-sepolia.api.onfinality.io/public
+
+# کلید API اتراسکن (اختیاری، برای تأیید قرارداد)
+ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
