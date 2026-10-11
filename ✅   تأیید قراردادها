@@ -1,0 +1,13 @@
+تأیید قرارداد یعنی کد منبع شما روی Etherscan برای عموم قابل مشاهده و بررسی می‌شود. این کار اعتماد کاربران را جلب می‌کند.
+
+برای هر قرارداد، دستور زیر را اجرا کنید (مثال برای توکن):
+
+```bash
+npx hardhat verify --network sepolia <TOKEN_ADDRESS>
+```
+
+نکته: اگر قرارداد شما در سازنده (constructor) ورودی دارد (مثل Staking که آدرس توکن را می‌گیرد)، باید آن ورودی را هم در دستور verify بگذارید:
+
+```bash
+npx hardhat verify --network sepolia <STAKING_ADDRESS> <TOKEN_ADDRESS>
+```
