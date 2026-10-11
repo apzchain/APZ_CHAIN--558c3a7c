@@ -1,0 +1,23 @@
+
+۴.۱ کامپایل قراردادها
+
+```bash
+cd ~/apz-chain
+npx hardhat compile
+```
+
+۴.۲ اجرای اسکریپت دیپلوی
+اسکریپت scripts/deploy.js که قبلاً ساختیم، آدرس قراردادهای Token، Staking و Governance را چاپ می‌کند. برای دیپلوی روی Sepolia:
+
+```bash
+npx hardhat run scripts/deploy.js --network sepolia
+```
+
+خروجی مشابه این خواهد بود:
+
+```
+Deployer: 0x...
+Token: 0x...
+Staking: 0x...
+Governance: 0x...
+```
