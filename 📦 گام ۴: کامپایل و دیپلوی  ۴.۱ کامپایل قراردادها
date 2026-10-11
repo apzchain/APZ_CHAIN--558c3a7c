@@ -1,0 +1,5 @@
+
+```bash
+cd ~/apz-chain
+npx hardhat compile
+```
